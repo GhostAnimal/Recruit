@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <%- include head %>
+  <body>
+  <div class="row">
+    <%- include layout %>
+    <div class="col-md-9">
+      <%- include header %> 
+          <div class="row">
+            <div class="col-md-6">
+              <div class="thumbnail">
+                <h3><%=  %></h3>
+                <h4><span class="label label-success">撒旦</span></h4>
+                <div><%=  %></div>
+                <hr>
+                <div class="input-group col-md-6 col-md-offset-6">
+                  <input type="text" name="" class="form-control">
+                  <span class="input-group-btn">
+                    <button class="btn btn-default" type="button">提交答案</button>
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="thumbnail">
+                <h3>答题评语</h3>
+                <h4>已尝试 <%=  %> 次</h4>
+                <div><%=  %></div>
+              </div>
+            </div>
+          </div> 
+    </div>
+  </div>
+  </body>
+</html>
