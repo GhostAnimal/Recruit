@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<%- include head %>
+	<title>register</title>
+</head>
+<body>
+	<ul class="nav nav-tabs" role="tablist">
+	  <li role="presentation"><a href="/login">LOGIN</a></li>
+	  <li role="presentation" class="active"><a href="/register">REGISTER</a></li>
+	</ul><br><br>
+	<div class="row">
+		<form class="col-md-4" role="form">
+		  <div class="form-group">
+		    <label>姓名</label>
+		    <input type="text" class="form-control" name="name" placeholder="姓名">
+		  </div>
+		  <div class="form-group">
+		    <label>昵称</label>
+		    <input type="text" class="form-control" name="nick" placeholder="昵称">
+		  </div>
+		  <div class="form-group">
+		    <label>学号</label>
+		    <input type="text" class="form-control" name="studentNum" placeholder="学号">
+		  </div>
+		  <div class="form-group">
+		    <label>身份证号</label>
+		    <input type="text" class="form-control" name="studentNum" placeholder="身份证号">
+		  </div>
+		  <div class="form-group">
+		    <label>Email</label>
+		    <input type="email" class="form-control" name="email" placeholder="Email">
+		  </div>
+		  <div class="form-group">
+		    <label>密码</label>
+		    <input type="password" class="form-control" name="password" placeholder="密码">
+		  </div>
+		  <div class="form-group">
+		    <label>确认密码</label>
+		    <input type="password" class="form-control" name="password-repeat" placeholder="确认密码">
+		  </div>
+		  <button type="submit" class="btn btn-lg btn-primary">确定注册</button>
+		</form>
+	</div>
+</body>
+</html>
