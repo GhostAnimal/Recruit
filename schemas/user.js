@@ -1,5 +1,5 @@
 var mongoose = require('mongoose');
-var bcrypt = require('bcryptjs')
+var crypto = require('crypto')
 
 // 用户数据模型
 var userSchema = new mongoose.Schema({
@@ -18,11 +18,11 @@ var userSchema = new mongoose.Schema({
     qq: String,
     studentNum: String,
     meta: {
-    	createAt{
+    	createAt:{
     		type: Date,
     		default: Date.now()
     	},
-    	updateAt{
+    	updateAt:{
     		type: Date,
     		default: Date.now()
     	}
@@ -40,21 +40,9 @@ userSchema.pre('save',function(next) {
 		this.meta.updateAt = Date.now();
 	}
 
-	// 密码hash
-	bcrypt.genSalt(10, function(err, salt) {
-		if (err) {
-			return next(err)
-		}
-		bcrypt.hash(user.password, salt, function(err, hash) {
-			if (err) {
-				return next(err)
-			}
-
-			user.password = hash
-
-			next()
-		})
-	})
+    // 密码 md5
+    var md5 = crypto.createHash('md5');
+    user.password = md5.update(user.password).digest('hex');
 
 	next()
 })
@@ -71,6 +59,19 @@ userSchema.statics = {
 				   .findOne({_id: id})
 				   .exec(cb)
 	},
+}
+
+userSchema.methods = {
+    comparePassword: function(_password, cb) {
+        var md5 = crypto.createHash('md5'),
+            password = md5.update(_password).digest('hex');
+        if (this.password != password) {
+            return cb(false)
+        }
+        else {
+            return cb(true)
+        }
+    }
 }
 
 module.exports = userSchema
