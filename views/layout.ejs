@@ -9,9 +9,9 @@
 		Score: <%=  %> || Rank: <%=  %>
 	</h4>
 	<ul class="nav nav-pills nav-stacked" role='tablist'>
-		<li role='presentation'><a href="#">xxx</a></li>
-		<li role='presentation'><a href="#">adsa</a></li>
-		<li role='presentation'><a href="#">qqwrq</a></li>
+		<% categories.forEach(function(category) { %>
+			<li role='presentation'><a href="<%= category._id %>"><%= category.name %></a></li>
+		<%	}) %>
 	</ul>
 </div>
 

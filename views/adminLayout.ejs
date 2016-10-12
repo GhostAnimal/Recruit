@@ -6,15 +6,15 @@
 		Hello, <%=  %>
 	</h3>
 	<ul class="nav nav-pills nav-stacked" role='tablist'>
-		<li role='presentation'><a href="#">xxx</a></li>
-		<li role='presentation'><a href="#">adsa</a></li>
-		<li role='presentation'><a href="#">qqwrq</a></li>
+		<% categories.forEach(function(category) { %>
+			<li role='presentation'><a href="<%= category._id %>"><%= category.name %></a></li>
+		<%	}) %>
 	</ul><br>
-	<div class="input-group">
-      <input type="text" name="" class="form-control">
-      <span class="input-group-btn">
-        <button class="btn btn-default" type="button">添加题目种类</button>
-      </span>
-    </div>
+	<form role="form" action="/newCategory" method="post">
+      <div class="form-group">
+	    <input type="text" class="form-control" name="category[name]" placeholder="问题种类名">
+	  </div>
+	  <button type="submit" class="btn btn-lg btn-info">添加</button>
+    </form>
 </div>
 

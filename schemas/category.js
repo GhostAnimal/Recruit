@@ -4,7 +4,7 @@ var ObjectId = mongoose.Schema.Types.ObjectId
 // 问题种类数据模型
 var categorySchema = new mongoose.Schema({
     name: String,
-    questions: [{type: ObjectId, ref: 'Question'}]
+    questions: [{type: ObjectId, ref: 'Question'}],
     meta: {
     	createAt:{
     		type: Date,
