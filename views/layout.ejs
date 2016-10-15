@@ -3,14 +3,14 @@
 		<img id="logo" src="/images/logo.9a70b71.png">
 	</div>
 	<h3 class="row text-center">
-		Hello, <%=  %>
+		Hello, <%= user.nick %>
 	</h3>
 	<h4 style="margin-bottom:60px" class="row text-center">
-		Score: <%=  %> || Rank: <%=  %>
+		Score: <%= user.score %> || Rank: <%= user.rank %>
 	</h4>
 	<ul class="nav nav-pills nav-stacked" role='tablist'>
 		<% categories.forEach(function(category) { %>
-			<li role='presentation'><a href="<%= category._id %>"><%= category.name %></a></li>
+			<li role='presentation'><a href="/categories/<%= category._id %>"><%= category.name %></a></li>
 		<%	}) %>
 	</ul>
 </div>

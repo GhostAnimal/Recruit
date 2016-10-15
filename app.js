@@ -7,8 +7,8 @@ var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 var session = require('express-session');
 var MongoStore = require('connect-mongo')(session);
-var User = require('./models/User');
 
+var User = require('./models/User');
 var routes = require('./routes/index');
 var settings = require('./settings');
 
@@ -21,8 +21,6 @@ mongoose.connect('mongodb://localhost/recruit')
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
-// uncomment after placing your favicon in /public
-//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -39,14 +37,6 @@ app.use(session({
     collection: 'sessions'
   })
 }));
-// app.use(function(req, res, next) {
-//     var _user = req.session.user
-//     if (_user) {
-//       app.locals.user=_user
-//       next()
-//     }
-//     return next()
-//   })
 
 routes(app)
 

@@ -9,7 +9,10 @@ var recordsSchema = new mongoose.Schema({
                 type: ObjectId,
                 ref: 'Question'
             },
-            score: Number,
+            score: {
+                type: Number,
+                default: 0
+            },
             comment: String,
             tried: {
                 type: Number,

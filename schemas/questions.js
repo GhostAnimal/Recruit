@@ -1,4 +1,5 @@
 var mongoose = require('mongoose');
+
 var ObjectId = mongoose.Schema.Types.ObjectId
 
 // 问题数据模型
@@ -9,7 +10,7 @@ var questionSchema = new mongoose.Schema({
     },
     deadline: String,
     description: String,
-    file: String，
+    file: String,
     name: String,
     needFile: Boolean,
     score: Number,

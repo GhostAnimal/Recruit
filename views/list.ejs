@@ -6,7 +6,7 @@
     <%- include layout %>
     <div class="col-md-9">
       <%- include header %> 
-        <h2 class="text-center"><%=  %>啦啦啦</h2>
+        <h2 class="text-center"><%= category.name %></h2>
         <table class="table">
           <tr>
             <td>题目</td>
@@ -14,12 +14,14 @@
             <td>截止日期</td>
             <td>tips</td>
           </tr> 
-          <tr>
-            <td><a href="#">asd</a></td>
-            <td>dsad</td>
-            <td>asda</td>
-            <td><span class="label label-success">Success</span></td>
-          </tr> 
+          <% questions.forEach(function (question) { %>
+            <tr>
+              <td><a href="/question/<%= question._id %>"><%= question.name %></a></td>
+              <td><%= question.score %></td>
+              <td><%= question.deadline %></td>
+              <td><span class="label label-success">Success</span></td>
+            </tr> 
+          <% }) %>
         </table>
     </div>
   </div>

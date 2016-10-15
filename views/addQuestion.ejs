@@ -6,7 +6,7 @@
     <%- include adminLayout %>
     <div class="col-md-9">
       <%- include adminHeader %> 
-      <form role="form" method="post" class="col-md-8">
+      <form role="form" method="post" action="/addQuestion/add" enctype="multipart/form-data" class="col-md-8">
         <div class="form-group">
           <label>问题名</label>
           <input type="text" class="form-control" name="question[name]" placeholder="问题名">
@@ -35,9 +35,14 @@
           否<input type="radio" name="question[needFile]" value="false">
         </div>
         <div class="form-group">
-          <label>附件(若不需要，可不提交)</label>
-          <input type="file" class="form-control" name="question[flie]">
+          <label>FLAG(若需要提交writeup则不填)</label>
+          <input type="text" class="form-control" name="flag[flag]" placeholder="FLAG">          
         </div>
+        <div class="form-group">
+          <label>附件(若不需要，可不提交)</label>
+          <input type="file" class="form-control" name="uploadPoster">
+        </div>
+        <input type="hidden" name="question[file]" value="">
         <button type="submit" class="btn btn-lg btn-info">添加</button>
       </form>
     </div>
