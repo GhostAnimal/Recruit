@@ -10,6 +10,7 @@ var questionSchema = new mongoose.Schema({
     },
     deadline: String,
     description: String,
+    flag: String,
     file: String,
     name: String,
     needFile: Boolean,

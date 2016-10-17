@@ -7,6 +7,7 @@ var mongoose = require('mongoose')
 var User = require('../models/User')
 var Category = require('../models/Category')
 var Question = require('../models/Question')
+var Record = require('../models/Record')
 
 var multipartMiddleware = multipart() 
 
@@ -21,24 +22,25 @@ var signinRequired = function(req, res, next) {
 }
 
 var saveFile = function (req, res, next) {
-	var postData = req.files.uploadPoster
-	var filePath = postData.path
-	var originalFilename = postData.originalFilename
+	if (req.files.uploadPoster) {
+		var postData = req.files.uploadPoster
+		var filePath = postData.path
+		var originalFilename = postData.originalFilename
 
-	console.log(req.files)
-	if (originalFilename) {
-		fs.readFile(filePath, function(err, data) {
-			var timestamp = Date.now()
-			var _type = postData.name.split('.')
-			    type = _type[_type.length-1]
-			var file = timestamp + '.' + type
-			var newPath = path.join(__dirname, '../', '/public/upload/' + file)
+		if (originalFilename) {
+			fs.readFile(filePath, function(err, data) {
+				var timestamp = Date.now()
+				var _type = postData.name.split('.')
+				    type = _type[_type.length-1]
+				var file = timestamp + '.' + type
+				var newPath = path.join(__dirname, '../', '/public/upload/' + file)
 
-			fs.writeFile(newPath, data, function(err) {
-				req.file = file
-				next()
+				fs.writeFile(newPath, data, function(err) {
+					req.file = file
+					next()
+				})
 			})
-		})
+		}
 	}
 	else {
 		next()
@@ -54,13 +56,34 @@ Category.fetch(function(err, _categories) {
 		categories = _categories
   	})
 
+var records = [];
+
+Record.fetch(function(err,_records) {
+	if (err) {
+		console.log(err)
+	}
+	records = _records
+})
+
+var record = {};
+
+
 
 module.exports = function (app) {
 	app.use(function(req, res, next) {
 	    var _user = req.session.user
 	    app.locals.user=_user
+	    if (_user) {
+			Record.find({for: _user._id}, function(err, _record) {
+				if (err) {
+					console.log(err)
+				}
+				record = _record;
+			})
+	    }
 	    next()
 	})
+
 
 	// 首页
 	app.get('/',signinRequired,function(req,res) {
@@ -80,6 +103,53 @@ module.exports = function (app) {
 			})
 		})
 	});
+
+	// 答题接口
+	app.post('/answer',multipartMiddleware,signinRequired,saveFile,function(req,res) {
+		Record.find({for: req.session.user._id}, function(err, record) {
+			if (err) {
+				console.log(err)
+			}
+			if (req.file) {
+		    	req.body.answer = req.file
+		    }
+
+			var _question = {
+				question: req.body.id,
+				answer: req.body.answer,
+				score: 0
+			}
+
+			Question.findById(req.body.id, function (err, question) {
+				if (!question.needFile) {
+					if (req.body.answer === question.flag) {
+						_question.score = question.score
+					}
+				}
+				var isFirst=true;
+
+				for (var i = record[0].questions.length - 1; i >= 0; i--) {
+					if (record[0].questions[i].question == req.body.id) {
+						record[0].questions[i] = _.extend(record[0].questions[i], _question);
+						isFirst = false
+					}
+				}
+
+				if (isFirst) {
+					record[0].questions.push(_question)
+				}
+			})
+
+			record[0].save(function(err, record) {
+				if (err) {
+					console.log(err)
+				}
+				console.log('回答成功')
+
+				res.redirect('/question/'+req.body.id)
+			})
+		})
+	})
 
 	// 问题列表页
 	app.get('/categories/:id',signinRequired,function(req,res) {
@@ -122,14 +192,24 @@ module.exports = function (app) {
 				}
 				else {
 					var user = new User(_user)
+
+					var _record = {
+					    for: user._id,
+					    questions: [],
+					}
+					var record = new Record(_record)
+
 					user.save(function(err, user) {
 						if (err) {
 							console.log(err)
 						}
-
-						console.log('注册成功')
-
-						res.redirect('/login')
+						record.save(function(err, record) {
+							if (err) {
+								console.log(err)
+							}
+							console.log('注册成功')
+							res.redirect('/login')
+						})
 					})
 				}
 			})
@@ -205,7 +285,7 @@ module.exports = function (app) {
 		})
 	})
 
-	// 添加问题
+	// 添加问题接口
 	app.post('/addQuestion/add',multipartMiddleware,signinRequired,saveFile,function(req, res) {
 		var id = req.body.question._id
 	    var questionObj = req.body.question
