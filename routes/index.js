@@ -65,22 +65,12 @@ Record.fetch(function(err,_records) {
 	records = _records
 })
 
-var record = {};
-
 
 
 module.exports = function (app) {
 	app.use(function(req, res, next) {
 	    var _user = req.session.user
 	    app.locals.user=_user
-	    if (_user) {
-			Record.find({for: _user._id}, function(err, _record) {
-				if (err) {
-					console.log(err)
-				}
-				record = _record;
-			})
-	    }
 	    next()
 	})
 
@@ -97,58 +87,137 @@ module.exports = function (app) {
 		var id = req.params.id
 
 		Question.findById(id, function (err, question) {
-			res.render('question',{
-				categories: categories,
-				question: question
+			Record.findOne({for: req.session.user._id} ,function(err, record) {
+				var theRecord = {}
+				for (var i = record.questions.length - 1; i >= 0; i--) {
+					if (record.questions[i].question == id) {
+						theRecord = record.questions[i]
+						console.log(theRecord)
+						break
+					}
+				}
+				res.render('question',{
+					categories: categories,
+					question: question,
+					theRecord: theRecord
+				})
 			})
 		})
 	});
 
 	// 答题接口
 	app.post('/answer',multipartMiddleware,signinRequired,saveFile,function(req,res) {
-		Record.find({for: req.session.user._id}, function(err, record) {
-			if (err) {
-				console.log(err)
-			}
-			if (req.file) {
-		    	req.body.answer = req.file
-		    }
-
-			var _question = {
-				question: req.body.id,
-				answer: req.body.answer,
-				score: 0
-			}
-
-			Question.findById(req.body.id, function (err, question) {
-				if (!question.needFile) {
-					if (req.body.answer === question.flag) {
-						_question.score = question.score
-					}
+		if (req.file) {
+	    	req.body.answer = req.file
+	    	Record.findOne({for: req.session.user._id},function(err, record) {
+	    		if (err) {
+	    			console.log(err)
+	    		}
+	    		var _question = {
+					question: req.body.id,
+					answer: req.body.answer,
 				}
+
 				var isFirst=true;
 
-				for (var i = record[0].questions.length - 1; i >= 0; i--) {
-					if (record[0].questions[i].question == req.body.id) {
-						record[0].questions[i] = _.extend(record[0].questions[i], _question);
+				for (var i = record.questions.length - 1; i >= 0; i--) {
+					if (record.questions[i].question == req.body.id) {
+						record.questions[i] = _.extend(record.questions[i], _question);
 						isFirst = false
+						console.log(record.questions[i])
 					}
 				}
 
 				if (isFirst) {
-					record[0].questions.push(_question)
+					record.questions.push(_question)
 				}
-			})
 
-			record[0].save(function(err, record) {
-				if (err) {
-					console.log(err)
-				}
-				console.log('回答成功')
+				record.save(function(err, record) {
+					if (err) {
+						console.log(err)
+					}
+					console.log('回答成功')
+					res.redirect('/question/'+req.body.id)
+				})
+	    	})
+	    }
+	    else {
+	    	Record.findOne({for: req.session.user._id}, function(err, record) {
+	    		if (err) {
+	    			console.log(err)
+	    		}
+	    		Question.findById(req.body.id, function(err, question) {
+					var _question = {
+						question: req.body.id,
+						answer: req.body.answer,
+						score: 0
+					}
 
-				res.redirect('/question/'+req.body.id)
-			})
-		})
+	    			if (req.body.answer === question.flag) {
+	    				_question.score = question.score
+	    			}
+	    			console.log(_question)
+	    			var isFirst=true;
+
+					for (var i = record.questions.length - 1; i >= 0; i--) {
+						if (record.questions[i].question == req.body.id) {
+							record.questions[i] = _.extend(record.questions[i], _question);
+							isFirst = false
+							console.log(record.questions[i])
+						}
+					}
+
+					if (isFirst) {
+						record.questions.push(_question)
+					}
+
+					record.save(function(err, record) {
+						if (err) {
+							console.log(err)
+						}
+						console.log('回答成功')
+						res.redirect('/question/'+req.body.id)
+					})
+	    		})
+	    		
+	    	})
+	    }
+		// 	var flag = ''
+		// 	var score = 0
+		// 	Question.findById(req.body.id, function (err, question) {
+		// 		if (!question.needFile) {
+		// 			flag = question.flag
+		// 			score = question.score
+		// 		}
+		// 	})
+		// 	if (req.body.answer === flag) {
+		// 		_question.score = score
+		// 	}
+
+		// 	var isFirst=true;
+
+		// 	for (var i = record[0].questions.length - 1; i >= 0; i--) {
+		// 		if (record[0].questions[i].question == req.body.id) {
+		// 			record[0].questions[i] = _.extend(record[0].questions[i], _question);
+		// 			isFirst = false
+		// 			console.log(record[0].questions[i])
+		// 		}
+		// 	}
+
+		// 	if (isFirst) {
+		// 		record[0].questions.push(_question)
+		// 	}
+
+		// 	record[0].save(function(err, record) {
+		// 		if (err) {
+		// 			console.log(err)
+		// 		}
+
+		// 		console.log('回答成功')
+
+		// 		res.redirect('/question/'+req.body.id)
+		// 	})
+		// })
 	})
 
 	// 问题列表页

@@ -32,8 +32,14 @@
             </div>
             <div class="col-md-6">
               <div class="thumbnail">
+                <% if (!theRecord.score) { %>
+                  <h2>得分：0/<%= question.score %></h2>                  
+                <%  } %>
+                <% if (theRecord.score) { %>
+                  <h2>得分：<%= theRecord.score %>/<%= question.score %></h2>
+                <%  } %>
                 <h3>答题评语</h3>
-                <div><%=  %></div>
+                <div><%= theRecord.comment %></div>
               </div>
             </div>
           </div> 
