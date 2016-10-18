@@ -6,10 +6,14 @@
     <%- include adminLayout %>
     <div class="col-md-9">
       <%- include adminHeader %> 
-      <form role="form" method="post" action="/addQuestion/add" enctype="multipart/form-data" class="col-md-8">
+      <form role="form" id="question" method="post" onsubmit="return check()" action="/addQuestion/add" enctype="multipart/form-data" class="col-md-8">
         <div class="form-group">
           <label>问题名</label>
           <input type="text" class="form-control" name="question[name]" placeholder="问题名">
+        </div>
+        <div class="form-group">
+          <label>Tips</label>
+          <input type="text" class="form-control" name="question[tips]" placeholder="Tips,请使用英文','分隔">
         </div>
         <div class="form-group">
           <label>问题描述</label>
@@ -43,9 +47,10 @@
           <input type="file" class="form-control" name="uploadPoster">
         </div>
         <input type="hidden" name="question[file]" value="">
-        <button type="submit" class="btn btn-lg btn-info">添加</button>
+        <button type="button" class="btn btn-lg btn-info">添加</button>
       </form>
     </div>
   </div>
+  <script id='submit' type="text/javascript" src='/javascripts/addQuestion.js'></script>
   </body>
 </html>

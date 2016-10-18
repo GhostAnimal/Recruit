@@ -47,6 +47,10 @@ var saveFile = function (req, res, next) {
 	}
 }
 
+var getRank = function (category) {
+	
+}
+
 var categories = [];
 
 Category.fetch(function(err, _categories) {
@@ -63,6 +67,15 @@ Record.fetch(function(err,_records) {
 		console.log(err)
 	}
 	records = _records
+})
+
+var record = {};
+app.locals.theScore = 0; 
+
+Record.findOne({for: req.session.user._id}, function (err, _record) {
+	for (var i = _record.questions.length - 1; i >= 0; i--) {
+		app.locals.theScore += app.locals.theScore + _record.questions[i].score
+	}
 })
 
 
@@ -182,42 +195,7 @@ module.exports = function (app) {
 	    		
 	    	})
 	    }
-		// 	var flag = ''
-		// 	var score = 0
-		// 	Question.findById(req.body.id, function (err, question) {
-		// 		if (!question.needFile) {
-		// 			flag = question.flag
-		// 			score = question.score
-		// 		}
-		// 	})
-		// 	if (req.body.answer === flag) {
-		// 		_question.score = score
-		// 	}
-
-		// 	var isFirst=true;
-
-		// 	for (var i = record[0].questions.length - 1; i >= 0; i--) {
-		// 		if (record[0].questions[i].question == req.body.id) {
-		// 			record[0].questions[i] = _.extend(record[0].questions[i], _question);
-		// 			isFirst = false
-		// 			console.log(record[0].questions[i])
-		// 		}
-		// 	}
-
-		// 	if (isFirst) {
-		// 		record[0].questions.push(_question)
-		// 	}
-
-		// 	record[0].save(function(err, record) {
-		// 		if (err) {
-		// 			console.log(err)
-		// 		}
-
-		// 		console.log('回答成功')
-
-		// 		res.redirect('/question/'+req.body.id)
-		// 	})
-		// })
+		
 	})
 
 	// 问题列表页
@@ -358,6 +336,7 @@ module.exports = function (app) {
 	app.post('/addQuestion/add',multipartMiddleware,signinRequired,saveFile,function(req, res) {
 		var id = req.body.question._id
 	    var questionObj = req.body.question
+	    questionObj.tips = questionObj.tips.split(',')
 	    var _question
 
 	    if (req.file) {
