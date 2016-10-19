@@ -52,15 +52,23 @@ var recordSchema = new mongoose.Schema({
 })
 
 recordSchema.pre('save', function(next) {
-   if (this.isNew) {
+  if (this.isNew) {
     this.meta.createAt = this.meta.updateAt = Date.now()
   }
   else {
     this.meta.updateAt = Date.now()
   }
   for (var i = this.questions.length - 1; i >= 0; i--) {
-    this.score += this.score + this.questions[i]
+    this.score += this.questions[i]
   }
+  this
+    .find({})
+    .sort('score')
+    .exec(function (err, _records) {
+      for (var i = 0; i < _records.length; i++) {
+        _records[i].rank = i + 1
+      }
+    })
 
   next() 
 })

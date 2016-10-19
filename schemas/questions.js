@@ -36,14 +36,14 @@ questionSchema.pre('save', function(next) {
   else {
     this.meta.updateAt = Date.now()
   }
-  this
-    .find({})
-    .sort('meta.createAt')
-    .exec(function (err, questions) {
-      for (var i = 0; i < questions.length; i++) {
-        questions[i].num = i+1
-      }
-    })
+  // this
+  //   .find({})
+  //   .sort('meta.createAt')
+  //   .exec(function (err, questions) {
+  //     for (var i = 0; i < questions.length; i++) {
+  //       questions[i].num = i+1
+  //     }
+  //   })
   next() 
 })
 

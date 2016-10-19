@@ -22,12 +22,14 @@
           <% records.forEach(function (record, index) { %>
             <% if (index < 20) { %>
               <tr>
-                <td><%= index %></td>
+                <td><%= index+1 %></td>
                 <td><%= record.nick %></td>
                 <td><%= record.scoreTemp %></td>
-                <% record.questions.forEach(function (question) { %>
-                  <td><a href="/question/<%= question.question %>"><%= question.num %></a></td>
-                <% }) %>
+                <td>
+                  <% record.questions.forEach(function (question) { %>
+                    <a href="/question/<%= question.question %>"><%= question.num %></a>
+                  <% }) %>
+                </td>
               </tr> 
             <%  } %>
           <% }) %>

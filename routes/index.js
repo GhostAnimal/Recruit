@@ -11,12 +11,19 @@ var Record = require('../models/Record')
 
 var multipartMiddleware = multipart() 
 
+var record = {}
+
 var signinRequired = function(req, res, next) {
   var user = req.session.user
 
   if (!user) {
   	console.log('未登录')
     return res.redirect('/login')
+  }
+  else {
+  	Record.findOne({for: user._id}, function(err, _record) {
+  		record = _record
+  	})
   }
 
   next()
@@ -87,7 +94,7 @@ var getRank = function (category) {
 				for (var j = _records[i].questions.length - 1; j >= 0; j--) {
 
 					if (_records[i].questions[j].category == category) {
-						_records[i].scoreTemp += _records[i].scoreTemp + _records[i].questions[j].score
+						_records[i].scoreTemp += _records[i].questions[j].score
 					}
 
 				}
@@ -112,6 +119,7 @@ module.exports = function (app) {
 
 		res.render('index',{
 			categories: categories,
+			record: record,
 			records: records
 		})
 	})
@@ -122,6 +130,7 @@ module.exports = function (app) {
 
 		res.render('index',{
 			categories: categories,
+			record: record,
 			records: records
 		})
 	});
@@ -141,6 +150,7 @@ module.exports = function (app) {
 					}
 				}
 				res.render('question',{
+					record: record,
 					categories: categories,
 					question: question,
 					theRecord: theRecord
@@ -246,6 +256,7 @@ module.exports = function (app) {
 				var questions = category.questions || []
 
 				res.render('list',{
+					record: record,
 					categories: categories,
 					category: category,
 					questions: questions
@@ -354,7 +365,7 @@ module.exports = function (app) {
 	      if (err) {
 	        console.log(err)
 	      }
-
+	      console.log('添加成功')
 	      res.redirect('/admin')
 		})
 	});	
