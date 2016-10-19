@@ -10,7 +10,7 @@
 	  <li role="presentation" class="active"><a href="/register">REGISTER</a></li>
 	</ul><br><br>
 	<div class="row">
-		<form id="register" onsubmit="return check()" class="col-md-4" method="post" role="form">
+		<form id="register" onsubmit="return check()" class="col-md-4" method="POST" role="form">
 		  <% if (err!='') { %>
 		  <h4 class="alert alert-danger"><%= err %></h4> 
 		  <% } %>
@@ -42,7 +42,7 @@
 		    <label>确认密码</label>
 		    <input type="password" class="form-control" name="password-repeat" placeholder="确认密码">
 		  </div>
-		  <button type="button" id="submit" class="btn btn-lg btn-primary">确定注册</button>
+		  <button type="button" id="registerSubmit" class="btn btn-lg btn-primary">确定注册</button>
 		</form>
 	</div>
 	<script type="text/javascript" src='/javascripts/register.js'></script>

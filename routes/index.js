@@ -15,6 +15,7 @@ var signinRequired = function(req, res, next) {
   var user = req.session.user
 
   if (!user) {
+  	console.log('未登录')
     return res.redirect('/login')
   }
 
@@ -47,9 +48,6 @@ var saveFile = function (req, res, next) {
 	}
 }
 
-var getRank = function (category) {
-	
-}
 
 var categories = [];
 
@@ -62,22 +60,42 @@ Category.fetch(function(err, _categories) {
 
 var records = [];
 
-Record.fetch(function(err,_records) {
-	if (err) {
-		console.log(err)
-	}
-	records = _records
-})
+var getRank = function (category) {
+	Record.find({}, function (err, _records) {
+		function keySort(key) {
+			return function (ob1, ob2) {
+				if (ob2[key] > ob1[key]) {
+					return 1
+				}
+				else if (ob2[key] < ob1[key]) {
+					return -1
+				}
+				else {
+					return 0
+				}
+			}
+		}
+		if (!category) {
+			records = _records.sort(getRank('score'))
+			for (var i = _records.length - 1; i >= 0; i--) {
+				_records[i].scoreTemp = _records[i].score
+			}
+		}
+		else{
+			for (var i = _records.length - 1; i >= 0; i--) {
 
-var record = {};
-app.locals.theScore = 0; 
+				for (var j = _records[i].questions.length - 1; j >= 0; j--) {
 
-Record.findOne({for: req.session.user._id}, function (err, _record) {
-	for (var i = _record.questions.length - 1; i >= 0; i--) {
-		app.locals.theScore += app.locals.theScore + _record.questions[i].score
-	}
-})
+					if (_records[i].questions[j].category == category) {
+						_records[i].scoreTemp += _records[i].scoreTemp + _records[i].questions[j].score
+					}
 
+				}
+				records = _records.sort(getRank('scoreTemp'))
+			}
+		}
+	})
+}
 
 
 module.exports = function (app) {
@@ -89,9 +107,22 @@ module.exports = function (app) {
 
 
 	// 首页
-	app.get('/',signinRequired,function(req,res) {
+	app.get("/",signinRequired,function(req, res) {
+		getRank()
+
 		res.render('index',{
 			categories: categories,
+			records: records
+		})
+	})
+	app.get('/record/:id',signinRequired,function(req,res) {
+		var category = req.params.id
+
+		getRank(category)
+
+		res.render('index',{
+			categories: categories,
+			records: records
 		})
 	});
 
@@ -128,6 +159,7 @@ module.exports = function (app) {
 	    		}
 	    		var _question = {
 					question: req.body.id,
+					category: req.body.category,
 					answer: req.body.answer,
 				}
 
@@ -162,6 +194,7 @@ module.exports = function (app) {
 	    		Question.findById(req.body.id, function(err, question) {
 					var _question = {
 						question: req.body.id,
+						category: req.body.category,
 						answer: req.body.answer,
 						score: 0
 					}
@@ -242,6 +275,7 @@ module.exports = function (app) {
 
 					var _record = {
 					    for: user._id,
+					    nick: user.nick,	
 					    questions: [],
 					}
 					var record = new Record(_record)

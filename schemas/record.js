@@ -7,8 +7,22 @@ var recordSchema = new mongoose.Schema({
       type: ObjectId,
       ref: 'User'
     },
+    nick: String,
+    score: {
+      type: Number,
+      default: 0
+    },
+    scoreTemp: {
+      type: Number,
+      default: 0
+    },
     questions: [
         {
+            category: {
+              type: ObjectId,
+              ref: 'Category'
+            },
+            num: Number,
             question: {
                 type: ObjectId,
                 ref: 'Question'
@@ -44,6 +58,9 @@ recordSchema.pre('save', function(next) {
   else {
     this.meta.updateAt = Date.now()
   }
+  for (var i = this.questions.length - 1; i >= 0; i--) {
+    this.score += this.score + this.questions[i]
+  }
 
   next() 
 })
@@ -52,7 +69,7 @@ recordSchema.statics =  {
     fetch: function(cb) {
         return this
           .find({})
-          .sort('meta.updateAt')
+          .sort('score')
           .exec(cb)
     },
     findById: function(id, cb) {

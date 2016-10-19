@@ -7,9 +7,9 @@
     <div class="col-md-9">
       <%- include header %> 
         <ul class="nav nav-tabs" role="tablist">
-          <li role="presentation" class="active"><a href="#">总排行</a></li>
+          <li role="presentation" class="active"><a href="/">总排行</a></li>
           <% categories.forEach(function(category) { %>
-            <li role="presentation"><a href="#"><%= category.name %></a></li>
+            <li role="presentation"><a href="/record/<%= category._id %>"><%= category.name %></a></li>
           <% }) %>
         </ul><br>
         <table class="table">
@@ -18,13 +18,19 @@
             <td>昵称</td>
             <td>得分</td>
             <td>题目</td>
-          </tr> 
-          <tr>
-            <td>1</td>
-            <td>dsad</td>
-            <td>asda</td>
-            <td><a href="#">ada</a></td>
-          </tr> 
+          </tr>
+          <% records.forEach(function (record, index) { %>
+            <% if (index < 20) { %>
+              <tr>
+                <td><%= index %></td>
+                <td><%= record.nick %></td>
+                <td><%= record.scoreTemp %></td>
+                <% record.questions.forEach(function (question) { %>
+                  <td><a href="/question/<%= question.question %>"><%= question.num %></a></td>
+                <% }) %>
+              </tr> 
+            <%  } %>
+          <% }) %>
         </table>
     </div>
   </div>

@@ -1,4 +1,4 @@
-$('#submit').on('click', function(event) {
+$('#registerSubmit').on('click', function(event) {
 	event.preventDefault();
 	if (check()==true) {
 		$('#register').attr('action','/register')

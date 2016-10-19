@@ -14,6 +14,7 @@ var questionSchema = new mongoose.Schema({
     flag: String,
     file: String,
     name: String,
+    num: Number,
     needFile: Boolean,
     score: Number,
     meta: {
@@ -35,7 +36,14 @@ questionSchema.pre('save', function(next) {
   else {
     this.meta.updateAt = Date.now()
   }
-
+  this
+    .find({})
+    .sort('meta.createAt')
+    .exec(function (err, questions) {
+      for (var i = 0; i < questions.length; i++) {
+        questions[i].num = i+1
+      }
+    })
   next() 
 })
 
