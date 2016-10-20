@@ -8,7 +8,6 @@ $('#add').on('click', function(event) {
 function check() {
 	console.log($('input'))
 	for (var i = 1; i <= 2; i++) {
-			console.log($('input')[i].value)
 		if ($('input')[i].value=='') {
 			alert('必要信息填写不完整')
 			return false

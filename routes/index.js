@@ -109,6 +109,21 @@ module.exports = function (app) {
 	app.use(function(req, res, next) {
 	    var _user = req.session.user
 	    app.locals.user=_user
+	    if (_user) {
+		    Record
+				.find({})
+				.sort('score')
+				.exec(function(err, _records) {
+					for (var i = 0; i < _records.length; i++) {
+				        _records[i].rank = i + 1
+				        _records[i].save(function(err, _r) {
+				        	if (err) {
+				        		console.log(err)
+				        	}
+				        })
+				      }
+				})
+	    }
 	    next()
 	})
 
@@ -278,7 +293,6 @@ module.exports = function (app) {
 				}
 				if (user) {
 					console.log('该email已被注册');
-					console.log(User.fetch());
 					res.render('register',{err: '该email已被注册,请重新填写'})
 				}
 				else {
@@ -288,6 +302,7 @@ module.exports = function (app) {
 					    for: user._id,
 					    nick: user.nick,	
 					    questions: [],
+					    rank: 0
 					}
 					var record = new Record(_record)
 
@@ -316,7 +331,6 @@ module.exports = function (app) {
 	app.post('/login',function(req, res) {
 		var _user = req.body.user;
 		var password = _user.password
-		console.log(password)
      	var email= _user.email
 
 		User.findOne({email: _user.email}, function(err ,user) {
@@ -382,6 +396,7 @@ module.exports = function (app) {
 		var id = req.body.question._id
 	    var questionObj = req.body.question
 	    questionObj.tips = questionObj.tips.split(',')
+	    console.log(questionObj)
 	    var _question
 
 	    if (req.file) {
@@ -423,6 +438,20 @@ module.exports = function (app) {
 		          })
 		        })
 		      }
+	          Question
+	          	.find({})
+	          	.sort('meta.createAt')
+	          	.exec(function(err, questions) {
+	          	  for (var i = 0; i < questions.length; i++) {
+			        questions[i].num = i+1
+			        questions[i].save(function(err, q) {
+			        	if (err) {
+			        		console.log(err)
+			        	}
+			        })
+			      }
+			      
+	          	})
 
 		    })
 		  }
