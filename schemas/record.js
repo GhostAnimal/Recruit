@@ -59,16 +59,12 @@ recordSchema.pre('save', function(next) {
     this.meta.updateAt = Date.now()
   }
   for (var i = this.questions.length - 1; i >= 0; i--) {
-    this.score += this.questions[i]
+    var temp = 0
+    temp += this.questions[i].score
+    if (temp!=this.score) {
+      this.score = temp
+    }
   }
-  // this
-  //   .find({})
-  //   .sort('score')
-  //   .exec(function (err, _records) {
-  //     for (var i = 0; i < _records.length; i++) {
-  //       _records[i].rank = i + 1
-  //     }
-  //   })
 
   next() 
 })

@@ -19,7 +19,11 @@
               <td><a href="/question/<%= question._id %>"><%= question.name %></a></td>
               <td><%= question.score %></td>
               <td><%= question.deadline %></td>
-              <td><span class="label label-success">Success</span></td>
+              <td>
+              <% question.tips.forEach(function(item) { %>
+                <span class="label label-success"><%= item %></span>
+              <%  }) %>
+              </td>
             </tr> 
           <% }) %>
         </table>

@@ -31,11 +31,11 @@ var signinRequired = function(req, res, next) {
 
 var saveFile = function (req, res, next) {
 	if (req.files.uploadPoster) {
-		var postData = req.files.uploadPoster
-		var filePath = postData.path
-		var originalFilename = postData.originalFilename
+		if (req.files.uploadPoster.originalFilename!='') {
+			var postData = req.files.uploadPoster
+			var filePath = postData.path
+			var originalFilename = postData.originalFilename
 
-		if (originalFilename) {
 			fs.readFile(filePath, function(err, data) {
 				var timestamp = Date.now()
 				var _type = postData.name.split('.')
@@ -65,44 +65,19 @@ Category.fetch(function(err, _categories) {
 		categories = _categories
   	})
 
-var records = [];
-
-var getRank = function (category) {
-	Record.find({}, function (err, _records) {
-		function keySort(key) {
-			return function (ob1, ob2) {
-				if (ob2[key] > ob1[key]) {
-					return 1
-				}
-				else if (ob2[key] < ob1[key]) {
-					return -1
-				}
-				else {
-					return 0
-				}
-			}
+function keySort(key) {
+	return function (ob1, ob2) {
+		if (ob2[key] > ob1[key]) {
+			return 1
 		}
-		if (!category) {
-			records = _records.sort(getRank('score'))
-			for (var i = _records.length - 1; i >= 0; i--) {
-				_records[i].scoreTemp = _records[i].score
-			}
+		else if (ob2[key] < ob1[key]) {
+			return -1
 		}
-		else{
-			for (var i = _records.length - 1; i >= 0; i--) {
-
-				for (var j = _records[i].questions.length - 1; j >= 0; j--) {
-
-					if (_records[i].questions[j].category == category) {
-						_records[i].scoreTemp += _records[i].questions[j].score
-					}
-
-				}
-				records = _records.sort(getRank('scoreTemp'))
-			}
+		else {
+			return 0
 		}
-	})
-}
+	}
+}	
 
 
 module.exports = function (app) {
@@ -110,19 +85,24 @@ module.exports = function (app) {
 	    var _user = req.session.user
 	    app.locals.user=_user
 	    if (_user) {
-		    Record
-				.find({})
-				.sort('score')
-				.exec(function(err, _records) {
-					for (var i = 0; i < _records.length; i++) {
-				        _records[i].rank = i + 1
-				        _records[i].save(function(err, _r) {
-				        	if (err) {
-				        		console.log(err)
-				        	}
-				        })
-				      }
-				})
+		    Record.find({}, function(err, _records) {
+		    	_records = _records.sort(keySort('score'))
+				for (var i = 0; i < _records.length; i++) {
+			        _records[i].rank = i + 1
+			        _records[i].save(function(err, _r) {
+			        	if (err) {
+			        		console.log(err)
+			        	}
+			        })
+			      }
+			})
+			Record.find({for: _user._id}, function(err, _record) {
+				if (err) {
+					console.log(err)
+				}
+				record = _record
+				console.log(record.questions)
+			})
 	    }
 	    next()
 	})
@@ -130,23 +110,39 @@ module.exports = function (app) {
 
 	// 首页
 	app.get("/",signinRequired,function(req, res) {
-		getRank()
+		Record.find({}, function (err, _records) {
+			records = _records.sort(keySort('score'))
+			for (var i = _records.length - 1; i >= 0; i--) {
+				_records[i].scoreTemp = _records[i].score
+			}
 
-		res.render('index',{
-			categories: categories,
-			record: record,
-			records: records
+			res.render('index',{
+				categories: categories,
+				record: record,
+				records: _records
+			})
 		})
+
 	})
 	app.get('/record/:id',signinRequired,function(req,res) {
 		var category = req.params.id
+		Record.find({}, function(err, _records) {
+			for (var i = _records.length - 1; i >= 0; i--) {
 
-		getRank(category)
+				for (var j = _records[i].questions.length - 1; j >= 0; j--) {
+					_records[i].scoreTemp = 0
+					if (_records[i].questions[j].category == category) {
+						_records[i].scoreTemp += _records[i].questions[j].score
+					}
 
-		res.render('index',{
-			categories: categories,
-			record: record,
-			records: records
+				}
+				records = _records.sort(keySort('scoreTemp'))
+			}
+			res.render('index',{
+				categories: categories,
+				record: record,
+				records: records
+			})
 		})
 	});
 
@@ -252,8 +248,7 @@ module.exports = function (app) {
 	    		})
 	    		
 	    	})
-	    }
-		
+	    }	
 	})
 
 	// 问题列表页
