@@ -13,6 +13,7 @@ var multipartMiddleware = multipart()
 
 var record = {}
 
+// 登录验证
 var signinRequired = function(req, res, next) {
   var user = req.session.user
 
@@ -29,6 +30,7 @@ var signinRequired = function(req, res, next) {
   next()
 }
 
+// 保存文件
 var saveFile = function (req, res, next) {
 	if (req.files.uploadPoster) {
 		if (req.files.uploadPoster.originalFilename!='') {
@@ -49,22 +51,29 @@ var saveFile = function (req, res, next) {
 				})
 			})
 		}
+		else {
+			next()
+		}
 	}
 	else {
 		next()
 	}
 }
 
-
+// 获取种类
 var categories = [];
 
-Category.fetch(function(err, _categories) {
-	    if (err) {
-	      console.log(err)
-	    }
+Category
+	.find({})
+	.sort('meta.creatAt')
+	.exec(function(err, _categories) {
+		if (err) {
+			console.log(err)
+		}
 		categories = _categories
-  	})
+	})
 
+// 排序函数
 function keySort(key) {
 	return function (ob1, ob2) {
 		if (ob2[key] > ob1[key]) {
@@ -84,6 +93,7 @@ module.exports = function (app) {
 	app.use(function(req, res, next) {
 	    var _user = req.session.user
 	    app.locals.user=_user
+	    // 获取当前用户排名
 	    if (_user) {
 		    Record.find({}, function(err, _records) {
 		    	_records = _records.sort(keySort('score'))
@@ -101,7 +111,6 @@ module.exports = function (app) {
 					console.log(err)
 				}
 				record = _record
-				console.log(record.questions)
 			})
 	    }
 	    next()
@@ -115,11 +124,11 @@ module.exports = function (app) {
 			for (var i = _records.length - 1; i >= 0; i--) {
 				_records[i].scoreTemp = _records[i].score
 			}
-
 			res.render('index',{
 				categories: categories,
 				record: record,
-				records: _records
+				records: _records,
+				page: ''
 			})
 		})
 
@@ -128,9 +137,8 @@ module.exports = function (app) {
 		var category = req.params.id
 		Record.find({}, function(err, _records) {
 			for (var i = _records.length - 1; i >= 0; i--) {
-
+				_records[i].scoreTemp = 0
 				for (var j = _records[i].questions.length - 1; j >= 0; j--) {
-					_records[i].scoreTemp = 0
 					if (_records[i].questions[j].category == category) {
 						_records[i].scoreTemp += _records[i].questions[j].score
 					}
@@ -141,7 +149,8 @@ module.exports = function (app) {
 			res.render('index',{
 				categories: categories,
 				record: record,
-				records: records
+				records: records,
+				page: category
 			})
 		})
 	});
@@ -179,6 +188,7 @@ module.exports = function (app) {
 	    			console.log(err)
 	    		}
 	    		var _question = {
+	    			num: req.body.num,
 					question: req.body.id,
 					category: req.body.category,
 					answer: req.body.answer,
@@ -214,6 +224,7 @@ module.exports = function (app) {
 	    		}
 	    		Question.findById(req.body.id, function(err, question) {
 					var _question = {
+						num: req.body.num,
 						question: req.body.id,
 						category: req.body.category,
 						answer: req.body.answer,
@@ -365,6 +376,29 @@ module.exports = function (app) {
 		})
 	});
 
+	// 种类管理
+	app.get('/admin/category/:id',signinRequired,function(req, res) {
+		Category
+			.find({_id: req.params.id})
+			.populate({
+				path: 'questions',
+			})
+			.exec(function(err, _categories) {
+				if (err) {
+					console.log(err)
+				}
+				var category = _categories[0] || {}
+				var questions = category.questions || []
+
+				res.render('adminCat',{
+					record: record,
+					categories: categories,
+					category: category,
+					questions: questions
+				})
+			})
+	})
+
 	// 添加问题种类接口
 	app.post('/newCategory',signinRequired,function(req, res) {
 		var _category = req.body.category
@@ -378,6 +412,30 @@ module.exports = function (app) {
 	      res.redirect('/admin')
 		})
 	});	
+
+	// 删除种类
+	app.delete('/removeCat',signinRequired,function(req, res) {
+		var id = req.query.id
+		if (id) {
+			Category.remove({_id: id}, function(err, category) {
+				if (err) {
+					console.log(err)
+					res.json({success: 0})
+				}
+				else {
+					Question.remove({category: id}, function(_err, questions) {
+						if (_err) {
+							console.log(err)
+							res.json({success: 0})
+						}
+						else {
+							res.json({success: 1})
+						}
+					})
+				}
+			})
+		}
+	})
 
 	// 添加问题页
 	app.get('/addQuestion',signinRequired,function(req, res) {
@@ -428,30 +486,79 @@ module.exports = function (app) {
 		          category.questions.push(question._id)
 
 		          category.save(function(err, category) {
+			        Question
+			          	.find({})
+			          	.sort('meta.createAt')
+			          	.exec(function(err, questions) {
+			          	  for (var i = 0; i < questions.length; i++) {
+					        questions[i].num = i+1
+					        questions[i].save(function(err, q) {
+					        	if (err) {
+					        		console.log(err)
+					        	}
+					        })
+					      }
+					      
+			          	})
 		          	console.log('添加成功')
 		            res.redirect('/admin')
 		          })
 		        })
 		      }
-	          Question
-	          	.find({})
-	          	.sort('meta.createAt')
-	          	.exec(function(err, questions) {
-	          	  for (var i = 0; i < questions.length; i++) {
-			        questions[i].num = i+1
-			        questions[i].save(function(err, q) {
-			        	if (err) {
-			        		console.log(err)
-			        	}
-			        })
-			      }
-			      
-	          	})
 
 		    })
 		  }
 	})
 
+	// 删除问题
+	app.delete('/removeQuestion',signinRequired,function(req, res) {
+		var id = req.query.id
+		if (id) {
+			Question.remove({_id: id}, function(err, question){
+				if (err) {
+					console.log(err)
+					res.json({success: 0})
+				}
+				else {
+					res.json({success: 1})
+				}
+			})
+		}
+	})
 
+	// 批改页
+	app.get('/comment/:id',signinRequired,function(req, res) {
+		var id = req.params.id
+		var name = ''
 
+		Question.findById(id, function(err, question) {
+			if (err) {
+				console.log(err)
+			}
+			name = question.name
+		})
+
+		var theRecords = []
+		Record
+			.find({})
+			.sort('meta.updateAt')
+			.exec(function (err, _records) {
+				for (var i = 0; i < _records.length; i++) {
+					for (var j = 0; j < _records[i].questions.length; j++) {
+						if (_records[i].questions[j].question == id) {
+							theRecords.push({
+								for: _records[i].for,
+								answer: _records[i].questions[j].answer
+							})
+						}
+					}
+				}
+
+				res.render('adminRecords', {
+					name: name,
+					categories: categories,
+					theRecords: theRecords
+				})
+			})
+	})
 };

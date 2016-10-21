@@ -7,9 +7,9 @@
     <div class="col-md-9">
       <%- include header %> 
         <ul class="nav nav-tabs" role="tablist">
-          <li role="presentation" class="active"><a href="/">总排行</a></li>
+          <li role="presentation" class="<%= page=='' ? 'active':'' %>"><a href="/">总排行</a></li>
           <% categories.forEach(function(category) { %>
-            <li role="presentation"><a href="/record/<%= category._id %>"><%= category.name %></a></li>
+            <li role="presentation" class="<%= page==category._id ? 'active':'' %>"><a href="/record/<%= category._id %>"><%= category.name %></a></li>
           <% }) %>
         </ul><br>
         <table class="table">

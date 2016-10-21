@@ -58,8 +58,8 @@ recordSchema.pre('save', function(next) {
   else {
     this.meta.updateAt = Date.now()
   }
+  var temp = 0
   for (var i = this.questions.length - 1; i >= 0; i--) {
-    var temp = 0
     temp += this.questions[i].score
     if (temp!=this.score) {
       this.score = temp

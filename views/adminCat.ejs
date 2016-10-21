@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <%- include head %>
+  <body>
+  <div class="row">
+    <%- include adminLayout %>
+    <div class="col-md-9">
+      <%- include adminHeader %>
+        <button id='delCat' class="btn btn-lg btn-danger" type="button" data-id='<%= category._id %>'>删除该问题种类</button>
+        <h2 class="text-center"><%= category.name %></h2>
+        <table class="table">
+          <tr>
+            <td>题目</td>
+            <td>批改</td>
+            <td>分值</td>
+            <td>截止日期</td>
+            <td>tips</td>
+            <td>删除</td>
+          </tr> 
+          <% questions.forEach(function (question) { %>
+            <tr>
+              <td><a href="/question/<%= question._id %>"><%= question.name %></a></td>
+              <td><button class="btn btn-xs <%= question.needFile ? '':'disabled' %>"><a href="/comment/<%= question._id %>"><%= question.needFile ? '批改':'提交flag型' %></a></button></td>
+              <td><%= question.score %></td>
+              <td><%= question.deadline %></td>
+              <td>
+              <% question.tips.forEach(function(item) { %>
+                <span class="label label-success"><%= item %></span>
+              <%  }) %>
+              </td>
+              <td><button class="del btn-xs btn-danger" type="button" data-id='<%= question._id %>'>删除</button></td>
+            </tr> 
+          <% }) %>
+        </table>
+    </div>
+  </div>
+  <script type="text/javascript" src='/javascripts/delete.js'></script>
+  </body>
+</html>

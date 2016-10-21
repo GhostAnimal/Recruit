@@ -7,7 +7,7 @@
 	</h3>
 	<ul class="nav nav-pills nav-stacked" role='tablist'>
 		<% categories.forEach(function(category) { %>
-			<li role='presentation'><a href="<%= category._id %>"><%= category.name %></a></li>
+			<li role='presentation'><a href="/admin/category/<%= category._id %>"><%= category.name %></a></li>
 		<%	}) %>
 	</ul><br>
 	<form role="form" action="/newCategory" method="post">

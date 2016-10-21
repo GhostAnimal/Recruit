@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <%- include head %>
+  <body>
+  <div class="row">
+    <%- include adminLayout %>
+    <div class="col-md-9">
+      <%- include adminHeader %> 
+        <h2 class="text-center"><%= name %></h2>
+        <table class="table">
+          <tr>
+            <td>昵称</td>
+            <td>writeup</td>
+            <td>批改</td>
+          </tr> 
+          <% theRecords.forEach(function(record) { %>
+            <tr>
+              <td><%= record.nick %></td>
+              <td><a target='_blank' download='<%= record.answer %>' href="<%= record.writeup %>">下载writeup</a></td>
+              <td><button class="btn btn-info">批改</button></td>
+            </tr> 
+          <% }) %>
+        </table>
+    </div>
+  </div>
+  </body>
+</html>
