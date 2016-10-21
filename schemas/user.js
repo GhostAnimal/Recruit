@@ -12,7 +12,10 @@ var userSchema = new mongoose.Schema({
     description: String,
     id: Number,
     idCards: String,
-    isAdmin: Boolean,
+    isAdmin: {
+        type: Boolean,
+        default: false
+    },
     name: String,
     phone: String,
     qq: String,

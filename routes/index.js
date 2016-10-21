@@ -30,6 +30,16 @@ var signinRequired = function(req, res, next) {
   next()
 }
 
+// 管理员验证
+var adminRequired = function(req, res, next) {
+	var user = req.session.user
+
+	if (!user.isAdmin) {
+		console.log('不是管理员')
+		return res.redirect('/')
+	}
+}
+
 // 保存文件
 var saveFile = function (req, res, next) {
 	if (req.files.uploadPoster) {
@@ -369,14 +379,14 @@ module.exports = function (app) {
 	});
 
 	// 管理员首页
-	app.get('/admin',signinRequired,function(req, res) {
+	app.get('/admin',signinRequired,adminRequired,function(req, res) {
 		res.render('admin',{
 			categories: categories,
 		})
 	});
 
 	// 种类管理
-	app.get('/admin/category/:id',signinRequired,function(req, res) {
+	app.get('/admin/category/:id',signinRequired,adminRequired,function(req, res) {
 		Category
 			.find({_id: req.params.id})
 			.populate({
@@ -399,7 +409,7 @@ module.exports = function (app) {
 	})
 
 	// 添加问题种类接口
-	app.post('/newCategory',signinRequired,function(req, res) {
+	app.post('/newCategory',signinRequired,adminRequired,function(req, res) {
 		var _category = req.body.category
 	    var category = new Category(_category)
 
@@ -413,7 +423,7 @@ module.exports = function (app) {
 	});	
 
 	// 删除种类
-	app.delete('/removeCat',signinRequired,function(req, res) {
+	app.delete('/removeCat',signinRequired,adminRequired,function(req, res) {
 		var id = req.query.id
 		if (id) {
 			Category.remove({_id: id}, function(err, category) {
@@ -437,14 +447,14 @@ module.exports = function (app) {
 	})
 
 	// 添加问题页
-	app.get('/addQuestion',signinRequired,function(req, res) {
+	app.get('/addQuestion',signinRequired,adminRequired,function(req, res) {
 		res.render('addQuestion',{
 			categories: categories,
 		})
 	})
 
 	// 添加问题接口
-	app.post('/addQuestion/add',multipartMiddleware,signinRequired,saveFile,function(req, res) {
+	app.post('/addQuestion/add',multipartMiddleware,signinRequired,adminRequired,saveFile,function(req, res) {
 		var id = req.body.question._id
 	    var questionObj = req.body.question
 	    questionObj.tips = questionObj.tips.split(',')
@@ -510,7 +520,7 @@ module.exports = function (app) {
 	})
 
 	// 删除问题
-	app.delete('/removeQuestion',signinRequired,function(req, res) {
+	app.delete('/removeQuestion',signinRequired,adminRequired,function(req, res) {
 		var id = req.query.id
 		if (id) {
 			Question.remove({_id: id}, function(err, question){
@@ -526,7 +536,7 @@ module.exports = function (app) {
 	})
 
 	// 批改页
-	app.get('/comment/:id',signinRequired,function(req, res) {
+	app.get('/comment/:id',signinRequired,adminRequired,function(req, res) {
 		var id = req.params.id
 		var name = ''
 		var max = 0
@@ -567,7 +577,7 @@ module.exports = function (app) {
 	})
 
 	// 批改接口
-	app.post('/toComment/:id',signinRequired,function(req, res) {
+	app.post('/toComment/:id',signinRequired,adminRequired,function(req, res) {
 		var id = req.params.id
 		var question = req.body.question
 		var score = req.body.score
