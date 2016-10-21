@@ -131,7 +131,6 @@ module.exports = function (app) {
 				page: ''
 			})
 		})
-
 	})
 	app.get('/record/:id',signinRequired,function(req,res) {
 		var category = req.params.id
@@ -530,12 +529,15 @@ module.exports = function (app) {
 	app.get('/comment/:id',signinRequired,function(req, res) {
 		var id = req.params.id
 		var name = ''
-
-		Question.findById(id, function(err, question) {
+		var max = 0
+		var question = ''
+		Question.findById(id, function(err, _question) {
 			if (err) {
 				console.log(err)
 			}
-			name = question.name
+			name = _question.name
+			max = _question.score
+			question = _question._id
 		})
 
 		var theRecords = []
@@ -548,17 +550,50 @@ module.exports = function (app) {
 						if (_records[i].questions[j].question == id) {
 							theRecords.push({
 								for: _records[i].for,
+								nick: _records[i].nick,
 								answer: _records[i].questions[j].answer
 							})
 						}
 					}
 				}
-
 				res.render('adminRecords', {
 					name: name,
+					max: max,
+					question: question,
 					categories: categories,
 					theRecords: theRecords
 				})
 			})
 	})
+
+	// 批改接口
+	app.post('/toComment/:id',signinRequired,function(req, res) {
+		var id = req.params.id
+		var question = req.body.question
+		var score = req.body.score
+		var comment = req.body.comment
+		var newRecord = {
+			score: score,
+			comment: comment
+		}
+		Record.findOne({for: id}, function(err, _record) {
+			if (err) {
+				console.log(err)
+			}
+			for (var i = _record.questions.length - 1; i >= 0; i--) {
+				if (_record.questions[i].question == question) {
+					_record.questions[i] = _.extend(_record.questions[i], newRecord);
+				}
+			}
+			_record.save(function(err, record) {
+				if (err) {
+					console.log(err)
+				}
+				console.log('批改成功')
+				res.redirect('/comment/' + question)
+			})
+		})
+	})
+
+
 };
