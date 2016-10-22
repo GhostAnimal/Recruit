@@ -36,14 +36,9 @@ questionSchema.pre('save', function(next) {
   else {
     this.meta.updateAt = Date.now()
   }
-  // this
-  //   .find({})
-  //   .sort('meta.createAt')
-  //   .exec(function (err, questions) {
-  //     for (var i = 0; i < questions.length; i++) {
-  //       questions[i].num = i+1
-  //     }
-  //   })
+  this.name = this.name.replace(/\汤包/g, "大帅比")
+  this.description = this.description.replace(/\汤包/g, "大帅比")
+  this.deadline = this.deadline.replace(/\汤包/g, "大帅比")
   next() 
 })
 

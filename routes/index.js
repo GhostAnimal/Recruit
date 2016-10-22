@@ -38,6 +38,8 @@ var adminRequired = function(req, res, next) {
 		console.log('不是管理员')
 		return res.redirect('/')
 	}
+
+	next()
 }
 
 // 保存文件
@@ -163,6 +165,55 @@ module.exports = function (app) {
 			})
 		})
 	});
+
+	// 个人信息页
+	app.get('/me',signinRequired,function(req,res) {
+		res.render('me',{
+			categories: categories,
+			record: record
+		})
+	})
+
+	// 修改信息
+	app.post('/changeInfo',signinRequired,function(req,res) {
+		var _user = req.body.user
+			console.log(_user)
+		User.findById(req.session.user._id, function(err, user) {
+			if (err) {
+				console.log(err)
+			}
+			console.log(user)
+			user = _.extend(user, _user)
+			user.save(function (err,userNew) {
+				if (err) {
+					console.log(err)
+				}
+				req.session.user = userNew
+				return res.redirect('/me')
+			})
+		})
+	})
+
+	// 修改密码
+	app.post('/changePassword',signinRequired,function(req,res) {
+		var _user = req.body.user,
+			password_repeat = req.body['password-repeat']
+
+		if (_user.password === password_repeat) {
+			User.findById(req.session.user._id,function(err, user) {
+				user.password = _user.password
+				user.save(function(err, userNew) {
+					if (err) {
+						console.log(err)
+					}
+					delete req.session.user
+
+					res.redirect('/login')
+				})
+			})
+		}
+	})
+
 
 	// 问题详情页
 	app.get('/question/:id',signinRequired,function(req,res) {
@@ -457,8 +508,8 @@ module.exports = function (app) {
 	app.post('/addQuestion/add',multipartMiddleware,signinRequired,adminRequired,saveFile,function(req, res) {
 		var id = req.body.question._id
 	    var questionObj = req.body.question
+	    questionObj.tips = questionObj.tips.replace(/\汤包/g, "大帅比")
 	    questionObj.tips = questionObj.tips.split(',')
-	    console.log(questionObj)
 	    var _question
 
 	    if (req.file) {

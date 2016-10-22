@@ -1,5 +1,6 @@
 var mongoose = require('mongoose');
 var ObjectId = mongoose.Schema.Types.ObjectId
+var _ = require('underscore')
 
 // 问题种类数据模型
 var categorySchema = new mongoose.Schema({
@@ -24,7 +25,7 @@ categorySchema.pre('save', function(next) {
   else {
     this.meta.updateAt = Date.now()
   }
-
+  this.name = this.name.replace(/\汤包/g, "大帅比")
   next()
 })
 

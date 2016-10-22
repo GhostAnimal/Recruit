@@ -46,7 +46,7 @@ userSchema.pre('save',function(next) {
     // 密码 md5
     var md5 = crypto.createHash('md5');
     user.password = md5.update(user.password).digest('hex');
-
+    
 	next()
 })
 
